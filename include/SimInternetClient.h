@@ -7,6 +7,7 @@
 #include <HardwareSerial.h>
 #include <TinyGsmClient.h> 
 #include <SSLClient.h>
+#include <memory>
 
 class SimInternetClient : public IInternetClient
 {
@@ -16,7 +17,9 @@ private:
     TinyGsmClient _gsmClient;
     SSLClient _sslClient;
 
-    SSLClientParameters mTLS = SSLClientParameters::fromPEM(AWS_CERT_CRT, sizeof AWS_CERT_CRT, AWS_CERT_PRIVATE, sizeof AWS_CERT_PRIVATE);
+    // Use a unique_ptr to manage the lifetime of the mTLS parameters
+    // and allow for initialization within the constructor body.
+    std::unique_ptr<SSLClientParameters> _mTLS;
 
 public:
     // Constructor now takes the modem's UART pins.

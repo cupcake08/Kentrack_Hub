@@ -42,10 +42,10 @@
      // --- Option 1: Use SIM/Cellular Client (Currently Active) ---
      // Provide RX, TX pins for the modem and baud rate.
      // For ESP32, Serial2 is often on GPIO 16 (RX) and 17 (TX).
-     internetClient = new SimInternetClient(16, 17, 115200); 
+    //  internetClient = new SimInternetClient(16, 17, 115200); 
      
      // --- Option 2: Use Wi-Fi Client ---
-     // internetClient = new WiFiInternetClient();
+     internetClient = new WiFiInternetClient();
  
      // 3. Inject the chosen internet client into our MQTT client.
      mqttClient = new AWSIoTMqttClient(*internetClient, AWS_IOT_ENDPOINT, AWS_IOT_PORT);

@@ -1,5 +1,6 @@
 #include "SimInternetClient.h"
 #include <TinyGsmClient.h>
+
 #include "AWSRootCA.h"
 
 SimInternetClient::SimInternetClient(int8_t rxPin, int8_t txPin, uint32_t baud, int uart_nr) : _sslClient(_gsmClient, TAs, (size_t)TAs_NUM, 1)
@@ -12,7 +13,9 @@ SimInternetClient::SimInternetClient(int8_t rxPin, int8_t txPin, uint32_t baud, 
 
     _gsmClient.init(_modem);
 
-    _sslClient.setMutualAuthParams(mTLS);
+    _mTLS = std::unique_ptr<SSLClientParameters>(new SSLClientParameters(SSLClientParameters::fromPEM(AWS_CERT_CRT, sizeof AWS_CERT_CRT, AWS_CERT_PRIVATE, sizeof AWS_CERT_PRIVATE)));
+
+    _sslClient.setMutualAuthParams(*_mTLS);
 }
 
 void SimInternetClient::connect()
@@ -21,14 +24,16 @@ void SimInternetClient::connect()
     // Give modem time to boot
     delay(6000);
 
-    if (!_modem->init()) {
+    if (!_modem->init())
+    {
         Serial.println("Failed to init modem. Restarting...");
         _modem->restart();
         return;
     }
 
     Serial.print("Waiting for network...");
-    if (!_modem->waitForNetwork()) {
+    if (!_modem->waitForNetwork())
+    {
         Serial.println(" fail");
         delay(10000);
         return;
@@ -37,7 +42,8 @@ void SimInternetClient::connect()
 
     Serial.print("Connecting to GPRS: ");
     Serial.print(GPRS_APN);
-    if (!_modem->gprsConnect(GPRS_APN, GPRS_USER, GPRS_PASS)) {
+    if (!_modem->gprsConnect(GPRS_APN, GPRS_USER, GPRS_PASS))
+    {
         Serial.println(" fail");
         delay(10000);
         return;
